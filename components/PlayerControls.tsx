@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, Dimensions } from "react-native";
+import { View, TouchableOpacity, Text, Dimensions, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { Audio } from 'expo-av';  // Ensure Audio is imported
+import { Audio } from "expo-av";
 import { useMusicStore } from "../store";
+import { useNavigation } from "@react-navigation/native"; // Importez useNavigation
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
 
 const { width } = Dimensions.get("window");
 
@@ -12,11 +15,13 @@ interface Track {
   uri: string;
   filename: string;
 }
+type PlaylistScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Playlist'>;
 
 export const PlayerControls: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
-  const { sound, isPlaying, togglePlay, playNext, playPrev, currentTrack } = useMusicStore();
+  const { sound, isPlaying, togglePlay, playNext, playPrev, currentTrack, createPlaylist } = useMusicStore();
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(1);
+  const navigation = useNavigation<PlaylistScreenNavigationProp>(); // Utilisez useNavigation pour la navigation
 
   useEffect(() => {
     const configureAudioBackground = async () => {
@@ -62,6 +67,14 @@ export const PlayerControls: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
     }
   };
 
+  const handleCreatePlaylist = () => {
+    const playlistName = `Playlist ${Date.now()}`; // Crée un nom unique pour la playlist
+    createPlaylist(playlistName); // Crée une playlist avec le nom généré
+    Alert.alert("Playlist créée", `Votre playlist "${playlistName}" a été créée!`, [
+      { text: "OK", onPress: () => navigation.navigate("Playlist") }, // Redirige vers l'écran Playlist
+    ]);
+  };
+
   return (
     <View>
       <Slider
@@ -84,6 +97,14 @@ export const PlayerControls: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => playNext(tracks)} style={{ marginHorizontal: 20 }}>
           <Ionicons name="play-skip-forward-outline" size={40} color="white" />
+        </TouchableOpacity>
+      </View>
+      <View style={{ alignItems: "center", marginTop: 20 }}>
+        <TouchableOpacity
+          style={{ backgroundColor: "#1DB954", padding: 10, borderRadius: 10 }}
+          onPress={handleCreatePlaylist} // Fonction pour créer la playlist
+        >
+          <Text style={{ color: "white" }}>Créer une Playlist</Text>
         </TouchableOpacity>
       </View>
     </View>

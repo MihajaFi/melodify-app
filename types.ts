@@ -2,6 +2,7 @@
 export type RootStackParamList = {
   Home: undefined;  // Pas de paramètres pour l'écran Home
   Player: { tracks: Track[] };  // PlayerScreen attend un paramètre 'tracks' de type Track[]
+  Playlist: undefined;  // Pas de paramètres pour l'écran Playlist
 };
 
 export type Track = {
