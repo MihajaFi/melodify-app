@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Animated, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
 import { styles } from '@/style/musicPlayer.style';
@@ -16,30 +16,8 @@ interface Track {
 export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   const { currentTrack, setTrack, isPlaying, togglePlay, sound, playNext, playPrev } = useMusicStore();
 
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const [textWidth, setTextWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(width - 100);
-
-  useEffect(() => {
-    if (currentTrack && textWidth > containerWidth) {
-      scrollX.setValue(0);
-      Animated.loop(
-        Animated.sequence([ 
-          Animated.timing(scrollX, {
-            toValue: -(textWidth - containerWidth),
-            duration: 7000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scrollX, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ])
-      ).start();
-    }
-  }, [currentTrack, textWidth, containerWidth]);
-
+  
   const playSound = async (track: Track) => {
     if (sound) {
       await sound.unloadAsync();
@@ -51,6 +29,16 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
     setTrack(track, newSound);
   };
 
+  const showMetadata = () => {
+    if (currentTrack) {
+      Alert.alert(
+        "Track Metadata",
+        `Filename: ${currentTrack.filename}\nURI: ${currentTrack.uri}`,
+        [{ text: "OK" }]
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -58,21 +46,28 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.trackItem} onPress={() => playSound(item)}>
-            <Text>{item.filename}</Text>
+            <View style={styles.trackItemContent}>
+              <MaterialCommunityIcons name="music-note-eighth" size={24} color="black" style={styles.icon} />
+              <Text style={styles.trackText}>{item.filename}</Text>
+              <TouchableOpacity onPress={showMetadata}>
+                <Ionicons name="ellipsis-vertical" size={14} color="black" style={styles.icon} />
+              </TouchableOpacity>
+            </View>
           </TouchableOpacity>
         )}
       />
       {currentTrack && (
         <View style={styles.footer} onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width - 100)}>
-          <Ionicons name="musical-notes" size={24} color="black" style={styles.icon} />
+          <View style={styles.iconContainer}>
+            <Ionicons name="musical-notes" size={24} color="black" style={styles.icon} />
+            <TouchableOpacity onPress={showMetadata}>
+              <Ionicons name="ellipsis-vertical" size={14} color="black" style={styles.icon} />
+            </TouchableOpacity>
+          </View>
           <View style={[styles.nowPlayingContainer, { width: containerWidth }]}>
-            <Animated.Text
-              style={[styles.nowPlaying, { transform: [{ translateX: scrollX }] }]}
-              numberOfLines={1}
-              onLayout={(event) => setTextWidth(event.nativeEvent.layout.width)}
-            >
+            <Text style={styles.nowPlaying} numberOfLines={1}>
               {currentTrack.filename}
-            </Animated.Text>
+            </Text>
           </View>
           <View style={styles.controls}>
             <TouchableOpacity onPress={() => playPrev(tracks)}>
