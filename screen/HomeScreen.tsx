@@ -5,6 +5,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MusicPlayer } from '../components';
 import { styles } from '@/style/home.style';
+import { PlaylistScreen } from './PlaylistScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -35,15 +36,15 @@ function ArtistsScreen() {
 function AlbumsScreen() {
   return (
     <View style={styles.centeredView}>
-      <Text>Liste des Albums</Text>
+      <Text>Album</Text>
     </View>
   );
 }
 
-function PlaylistScreen() {
+function PlaylistScreenPage() {
   return (
     <View style={styles.centeredView}>
-      <Text>Playlist</Text>
+      <PlaylistScreen />
     </View>
   );
 }
@@ -74,7 +75,7 @@ export function HomeScreen() {
           name="Piste"
           component={TracksScreen}
           options={{
-            tabBarIcon: ({ color }) => <MaterialIcons name="library-music" size={24} color={color} />, 
+            tabBarIcon: ({ color }) => <MaterialIcons name="library-music" size={24} color={color} />,
             tabBarLabel: 'Piste',
           }}
         />
@@ -82,7 +83,7 @@ export function HomeScreen() {
           name="Artistes"
           component={ArtistsScreen}
           options={{
-            tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />, 
+            tabBarIcon: ({ color }) => <MaterialIcons name="person" size={24} color={color} />,
             tabBarLabel: 'Artistes',
           }}
         />
@@ -90,15 +91,15 @@ export function HomeScreen() {
           name="Albums"
           component={AlbumsScreen}
           options={{
-            tabBarIcon: ({ color }) => <MaterialIcons name="album" size={24} color={color} />, 
+            tabBarIcon: ({ color }) => <MaterialIcons name="album" size={24} color={color} />,
             tabBarLabel: 'Albums',
           }}
         />
         <Tab.Screen
           name="Playlist"
-          component={PlaylistScreen}
+          component={PlaylistScreenPage}
           options={{
-            tabBarIcon: ({ color }) => <MaterialIcons name="queue-music" size={24} color={color} />, 
+            tabBarIcon: ({ color }) => <MaterialIcons name="queue-music" size={24} color={color} />,
             tabBarLabel: 'Playlist',
           }}
         />
