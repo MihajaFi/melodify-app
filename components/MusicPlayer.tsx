@@ -1,8 +1,11 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
+import { styles } from '@/style/musicPlayer.style';
+
+const { width } = Dimensions.get("window");
 
 interface Track {
   id: string;
@@ -12,6 +15,30 @@ interface Track {
 
 export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   const { currentTrack, setTrack, isPlaying, togglePlay, sound, playNext, playPrev } = useMusicStore();
+
+  const scrollX = useRef(new Animated.Value(0)).current;
+  const [textWidth, setTextWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(width - 100);
+
+  useEffect(() => {
+    if (currentTrack && textWidth > containerWidth) {
+      scrollX.setValue(0);
+      Animated.loop(
+        Animated.sequence([ 
+          Animated.timing(scrollX, {
+            toValue: -(textWidth - containerWidth),
+            duration: 7000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scrollX, {
+            toValue: 0,
+            duration: 500,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [currentTrack, textWidth, containerWidth]);
 
   const playSound = async (track: Track) => {
     if (sound) {
@@ -36,8 +63,17 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         )}
       />
       {currentTrack && (
-        <View style={styles.footer}>
-          <Text style={styles.nowPlaying}>Now Playing: {currentTrack.filename}</Text>
+        <View style={styles.footer} onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width - 100)}>
+          <Ionicons name="musical-notes" size={24} color="black" style={styles.icon} />
+          <View style={[styles.nowPlayingContainer, { width: containerWidth }]}>
+            <Animated.Text
+              style={[styles.nowPlaying, { transform: [{ translateX: scrollX }] }]}
+              numberOfLines={1}
+              onLayout={(event) => setTextWidth(event.nativeEvent.layout.width)}
+            >
+              {currentTrack.filename}
+            </Animated.Text>
+          </View>
           <View style={styles.controls}>
             <TouchableOpacity onPress={() => playPrev(tracks)}>
               <Ionicons name="play-back" size={32} color="black" />
@@ -54,33 +90,3 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  trackItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: '#eee',
-    padding: 10,
-    alignItems: 'center',
-  },
-  nowPlaying: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
-    marginTop: 10,
-  },
-});
