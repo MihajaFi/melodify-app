@@ -1,12 +1,14 @@
-// MusicPlayer.tsx
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
-import { useNavigation } from '@react-navigation/native';  // Utilisation de la navigation
-import { RootStackParamList } from '../types';  // Importer RootStackParamList
+import { styles } from '@/style/musicPlayer.style';
+import { useNavigation } from '@react-navigation/native'; 
+import { RootStackParamList } from '../types'; 
 import { StackNavigationProp } from '@react-navigation/stack';
+
+const { width } = Dimensions.get("window");
 
 interface Track {
   id: string;
@@ -18,17 +20,52 @@ type PlayerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Playe
 
 export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   const { currentTrack, setTrack, isPlaying, togglePlay, sound, playNext, playPrev } = useMusicStore();
-  const navigation = useNavigation<PlayerScreenNavigationProp>();  // Hook de navigation
+  const [containerWidth, setContainerWidth] = useState(width - 100);
+  const navigation = useNavigation<PlayerScreenNavigationProp>();
+  // Configuration de l'audio en arrière-plan
+  useEffect(() => {
+    const configureAudioBackground = async () => {
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
+          staysActiveInBackground: true,
+        });
+        console.log("Audio en arrière-plan activé");
+      } catch (error) {
+        console.log("Erreur lors de la configuration de l'audio en arrière-plan:", error);
+      }
+    };
+
+    configureAudioBackground();
+
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, [sound]);
 
   const playSound = async (track: Track) => {
     if (sound) {
-      await sound.unloadAsync();
+      await sound.unloadAsync(); // Unload previous sound if exists
     }
+
     const { sound: newSound } = await Audio.Sound.createAsync(
       { uri: track.uri },
       { shouldPlay: true }
     );
-    setTrack(track, newSound);
+    setTrack(track, newSound); // Set new track and sound object
+  };
+
+  const showMetadata = () => {
+    if (currentTrack) {
+      Alert.alert(
+        "Track Metadata",
+        `Filename: ${currentTrack.filename}\nURI: ${currentTrack.uri}`,
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const goToPlayerScreen = () => {
@@ -42,63 +79,44 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.trackItem} onPress={() => playSound(item)}>
-            <Text>{item.filename}</Text>
+            <View style={styles.trackItemContent}>
+              <MaterialCommunityIcons name="music-note-eighth" size={24} color="black" style={styles.icon} />
+              <Text style={styles.trackText}>{item.filename}</Text>
+              <TouchableOpacity onPress={showMetadata}>
+                <Ionicons name="ellipsis-vertical" size={14} color="black" style={styles.icon} />
+              </TouchableOpacity>
+            </View>
           </TouchableOpacity>
         )}
       />
       {currentTrack && (
         <TouchableOpacity onPress={goToPlayerScreen}>
-          <View style={styles.footer}>
-            <Text style={styles.nowPlaying}>Now Playing: {currentTrack.filename}</Text>
+          <View style={styles.footer} onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width - 100)}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="musical-notes" size={24} color="white" style={styles.icon} />
+            </View>
+            <View style={[styles.nowPlayingContainer, { width: containerWidth }]}>
+              <Text style={[styles.nowPlaying, { color: 'white' }]} numberOfLines={1}>
+                {currentTrack.filename}
+              </Text>
+            </View>
             <View style={styles.controls}>
               <TouchableOpacity onPress={() => playPrev(tracks)}>
-                <Ionicons name="play-back" size={32} color="black" />
+                <Ionicons name="play-back" size={32} color="white" />
               </TouchableOpacity>
               <TouchableOpacity onPress={togglePlay}>
-                <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="black" />
+                <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="white" />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => playNext(tracks)}>
-                <Ionicons name="play-forward" size={32} color="black" />
+                <Ionicons name="play-forward" size={32} color="white" />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity onPress={showMetadata}>
+              <Ionicons name="ellipsis-vertical" size={30} color="white" style={styles.icon} />
+            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  trackItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    backgroundColor: '#eee',
-    padding: 10,
-    alignItems: 'center',
-  },
-  nowPlaying: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '80%',
-    marginTop: 10,
-  },
-  goToPlayer: {
-    color: '#1DB954',
-    marginTop: 20,
-    fontSize: 16,
-  },
-});

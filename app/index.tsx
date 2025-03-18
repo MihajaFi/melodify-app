@@ -1,15 +1,20 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { HomeScreen, PlayerScreen } from "@/screen";
-import { RootStackParamList } from '@/types';
-const Stack = createStackNavigator<RootStackParamList>(); 
+import React from "react";
+import { createStackNavigator } from "@react-navigation/stack";
+import { HomeScreen, PlayerScreen, PlaylistScreen ,PlaylistDetailScreen} from "@/screen";
+import { RootStackParamList } from "@/types";
+import * as SplashScreen from "expo-splash-screen";
+const Stack = createStackNavigator<RootStackParamList>();
+
+SplashScreen.preventAutoHideAsync();
+setTimeout(SplashScreen.hideAsync, 2000);
 
 export default function Index() {
   return (
-    
-      <Stack.Navigator>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen  name="Player" component={PlayerScreen} />
-      </Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Player" component={PlayerScreen} />
+      <Stack.Screen name="Playlist" component={PlaylistScreen} />
+      <Stack.Screen name="Detail" component={PlaylistDetailScreen} />
+    </Stack.Navigator>
   );
 }
