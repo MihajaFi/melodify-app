@@ -4,8 +4,8 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
 import { styles } from '@/style/musicPlayer.style';
-import { useNavigation } from '@react-navigation/native'; 
-import { RootStackParamList } from '../types'; 
+import { useNavigation } from '@react-navigation/native';
+import { RootStackParamList } from '../types';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 const { width } = Dimensions.get("window");
