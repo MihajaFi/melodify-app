@@ -52,7 +52,7 @@ export function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Music</Text>
+        <Text style={styles.headerTitle}>Melodify</Text>
         <View style={styles.headerIcons}>
           <TouchableOpacity style={styles.iconButton}>
             <MaterialIcons name="search" size={24} color="#fff" />

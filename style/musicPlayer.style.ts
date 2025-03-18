@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    backgroundColor: '#eee',
+    backgroundColor: 'hsla(0, 100.00%, 81.40%, 0.50)',
     padding: 10,
     borderRadius: 20,
     flexDirection: 'row',

@@ -27,8 +27,8 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
     const configureAudioBackground = async () => {
       try {
         await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,  
-          allowsRecordingIOS: false,   
+          playsInSilentModeIOS: true,
+          allowsRecordingIOS: false,
           staysActiveInBackground: true,
         });
         console.log("Audio en arrière-plan activé");
@@ -90,31 +90,31 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         )}
       />
       {currentTrack && (
-          <TouchableOpacity onPress={goToPlayerScreen}>
-        <View style={styles.footer} onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width - 100)}>
-          <View style={styles.iconContainer}>
-            <Ionicons name="musical-notes" size={24} color="black" style={styles.icon} />
+        <TouchableOpacity onPress={goToPlayerScreen}>
+          <View style={styles.footer} onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width - 100)}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="musical-notes" size={24} color="white" style={styles.icon} />
+            </View>
+            <View style={[styles.nowPlayingContainer, { width: containerWidth }]}>
+              <Text style={[styles.nowPlaying, { color: 'white' }]} numberOfLines={1}>
+                {currentTrack.filename}
+              </Text>
+            </View>
+            <View style={styles.controls}>
+              <TouchableOpacity onPress={() => playPrev(tracks)}>
+                <Ionicons name="play-back" size={32} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={togglePlay}>
+                <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => playNext(tracks)}>
+                <Ionicons name="play-forward" size={32} color="white" />
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity onPress={showMetadata}>
-              <Ionicons name="ellipsis-vertical" size={14} color="black" style={styles.icon} />
+              <Ionicons name="ellipsis-vertical" size={30} color="white" style={styles.icon} />
             </TouchableOpacity>
           </View>
-          <View style={[styles.nowPlayingContainer, { width: containerWidth }]}>
-            <Text style={styles.nowPlaying} numberOfLines={1}>
-              {currentTrack.filename}
-            </Text>
-          </View>
-          <View style={styles.controls}>
-            <TouchableOpacity onPress={() => playPrev(tracks)}>
-              <Ionicons name="play-back" size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={togglePlay}>
-              <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => playNext(tracks)}>
-              <Ionicons name="play-forward" size={32} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View>
         </TouchableOpacity>
       )}
     </View>
