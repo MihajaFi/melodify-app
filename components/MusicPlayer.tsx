@@ -1,8 +1,10 @@
+// MusicPlayer.tsx
 import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
+import { useNavigation } from '@react-navigation/native';  // Utilisation de la navigation
 
 interface Track {
   id: string;
@@ -12,6 +14,7 @@ interface Track {
 
 export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   const { currentTrack, setTrack, isPlaying, togglePlay, sound, playNext, playPrev } = useMusicStore();
+  const navigation = useNavigation();  // Hook de navigation
 
   const playSound = async (track: Track) => {
     if (sound) {
@@ -22,6 +25,10 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
       { shouldPlay: true }
     );
     setTrack(track, newSound);
+  };
+
+  const goToPlayerScreen = () => {
+    navigation.navigate('Player', { tracks });  // Navigation vers l'écran PlayerScreen
   };
 
   return (
@@ -36,6 +43,7 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
         )}
       />
       {currentTrack && (
+        <TouchableOpacity onPress={goToPlayerScreen}>
         <View style={styles.footer}>
           <Text style={styles.nowPlaying}>Now Playing: {currentTrack.filename}</Text>
           <View style={styles.controls}>
@@ -49,7 +57,12 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
               <Ionicons name="play-forward" size={32} color="black" />
             </TouchableOpacity>
           </View>
+          
+          
+         
+          
         </View>
+      </TouchableOpacity>
       )}
     </View>
   );
@@ -82,5 +95,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '80%',
     marginTop: 10,
+  },
+  goToPlayer: {
+    color: '#1DB954',
+    marginTop: 20,
+    fontSize: 16,
   },
 });
