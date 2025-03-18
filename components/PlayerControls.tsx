@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, TouchableOpacity, Text, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
-import { Audio } from 'expo-av';  
+import { Audio } from 'expo-av';  // Ensure Audio is imported
 import { useMusicStore } from "../store";
 
 const { width } = Dimensions.get("window");
