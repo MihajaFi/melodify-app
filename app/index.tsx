@@ -1,6 +1,6 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { HomeScreen, PlayerScreen, PlaylistScreen } from "@/screen";
+import { HomeScreen, PlayerScreen, PlaylistScreen ,PlaylistDetailScreen} from "@/screen";
 import { RootStackParamList } from "@/types";
 import * as SplashScreen from "expo-splash-screen";
 const Stack = createStackNavigator<RootStackParamList>();
@@ -14,6 +14,7 @@ export default function Index() {
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Player" component={PlayerScreen} />
       <Stack.Screen name="Playlist" component={PlaylistScreen} />
+      <Stack.Screen name="Detail" component={PlaylistDetailScreen} />
     </Stack.Navigator>
   );
 }

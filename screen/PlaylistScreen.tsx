@@ -1,96 +1,89 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, FlatList, Modal, TextInput, Button, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, FlatList, Modal, TextInput, Alert } from "react-native";
 import { useMusicStore } from "../store";
-import { Ionicons } from "@expo/vector-icons";
-import * as MediaLibrary from 'expo-media-library';
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native'; 
+import { RootStackParamList } from '../types'; 
+import { StackNavigationProp } from '@react-navigation/stack';
+import { styles } from "@/style/playlist.style";
 
-interface Track {
-  id: string;
-  uri: string;
-  filename: string;
-}
+type DetailNavigationProp = StackNavigationProp<RootStackParamList, 'Detail'>;
 
 export const PlaylistScreen: React.FC = () => {
-  const { playlists, addTrackToPlaylist } = useMusicStore();
-  const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
-  const [showAddTrackModal, setShowAddTrackModal] = useState(false);
-  const [tracks, setTracks] = useState<Track[]>([]); // Liste des morceaux
-  const [selectedTrack, setSelectedTrack] = useState<Track | null>(null); // Morceau sélectionné
+  const { playlists, createPlaylist } = useMusicStore();
+  const [showAddPlaylistModal, setShowAddPlaylistModal] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const navigation = useNavigation<DetailNavigationProp>();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status === 'granted') {
-        const media = await MediaLibrary.getAssetsAsync({ mediaType: 'audio' });
-        setTracks(media.assets as Track[]); // Récupérer les morceaux de musique
-      }
-    })();
-  }, []);
-
-  const handleAddTrackToPlaylist = () => {
-    if (selectedPlaylist && selectedTrack) {
-      addTrackToPlaylist(selectedPlaylist.name, selectedTrack);
-      setShowAddTrackModal(false);
-      Alert.alert('Morceau ajouté', `Le morceau "${selectedTrack.filename}" a été ajouté à la playlist.`);
+  const handleAddPlaylist = () => {
+    if (newPlaylistName.trim()) {
+      createPlaylist(newPlaylistName);
+      setNewPlaylistName("");
+      setShowAddPlaylistModal(false);
+    } else {
+      Alert.alert('Erreur', 'Veuillez entrer un nom pour la playlist.');
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Mes Playlists</Text>
-      
+    <View style={styles.container}>
+      {/* Bouton d'ajout de playlist */}
+      <TouchableOpacity
+        style={styles.addPlaylistCard}
+        onPress={() => setShowAddPlaylistModal(true)}
+      >
+        <Ionicons name="add-circle-outline" size={24} color="white" />
+        <Text style={styles.addPlaylistText}>Ajouter une Playlist</Text>
+      </TouchableOpacity>
+
+      {/* Liste des playlists */}
       <FlatList
         data={playlists}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={{ padding: 15, marginBottom: 10, backgroundColor: "#f0f0f0", borderRadius: 10 }}
-            onPress={() => setSelectedPlaylist(item)}
+            style={styles.playlistItem}
+            onPress={() => {
+              // Naviguer vers l'écran Detail et passer uniquement le nom de la playlist
+              navigation.navigate('Detail', { 
+                playlistName: item.name, // Passer uniquement le nom de la playlist
+              });
+            }}
           >
-            <Text style={{ fontSize: 18 }}>{item.name}</Text>
+            <View style={styles.iconFrame}>
+              <MaterialCommunityIcons name="bookmark-music" size={24} color="black" />
+            </View>
+            <Text style={styles.playlistName}>{item.name}</Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.name}
       />
-      
-      {selectedPlaylist && (
-        <View style={{ marginTop: 20 }}>
-          <Text style={{ fontSize: 18 }}>Playlist: {selectedPlaylist.name}</Text>
-          <TouchableOpacity
-            style={{ marginTop: 10, padding: 10, backgroundColor: "#1DB954", borderRadius: 10 }}
-            onPress={() => setShowAddTrackModal(true)}
-          >
-            <Text style={{ color: "white", textAlign: "center" }}>Ajouter un morceau</Text>
-          </TouchableOpacity>
-        </View>
-      )}
 
-      {/* Modal pour ajouter un morceau */}
+      {/* Modal pour ajouter une nouvelle playlist */}
       <Modal
-        visible={showAddTrackModal}
+        visible={showAddPlaylistModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowAddTrackModal(false)}
+        onRequestClose={() => setShowAddPlaylistModal(false)}
       >
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <View style={{ width: 300, padding: 20, backgroundColor: "white", borderRadius: 10 }}>
-            <Text style={{ marginBottom: 10 }}>Sélectionner un morceau</Text>
-            
-            <FlatList
-              data={tracks}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={{ padding: 10, marginBottom: 10, backgroundColor: "#f0f0f0", borderRadius: 10 }}
-                  onPress={() => setSelectedTrack(item)} // Sélectionner un morceau
-                >
-                  <Text>{item.filename}</Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.id}
+        <View style={styles.modalBackground}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Entrez le nom de la nouvelle playlist</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Nom de la playlist"
+              value={newPlaylistName}
+              onChangeText={setNewPlaylistName}
             />
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-              <Button title="Ajouter" onPress={handleAddTrackToPlaylist} />
-              <Button title="Annuler" onPress={() => setShowAddTrackModal(false)} />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.modalButton} onPress={handleAddPlaylist}>
+                <Text style={styles.modalButtonText}>Ajouter</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowAddPlaylistModal(false)}
+              >
+                <Text style={styles.modalButtonText}>Annuler</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
