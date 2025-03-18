@@ -90,7 +90,7 @@ export const PlayerControls: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
           <Ionicons name="play-skip-back-outline" size={40} color="white" />
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ backgroundColor: "#1DB954", padding: 20, borderRadius: 50 }}
+          style={{ padding: 20, borderRadius: 50 }}
           onPress={async () => togglePlay()}
         >
           <Ionicons name={isPlaying ? "pause" : "play"} size={40} color="white" />

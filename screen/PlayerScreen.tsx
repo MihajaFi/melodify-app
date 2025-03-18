@@ -1,65 +1,59 @@
-// PlayerScreen.tsx
 import React from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
-import { PlayerControls } from "../components"; // Importer le contrôleur de lecture
+import { View, Text, TouchableOpacity } from "react-native";
+import { PlayerControls } from "../components";
 import { useMusicStore } from "../store";
 import { RouteProp } from "@react-navigation/native";
-import { RootStackParamList } from "../types"; // Assurez-vous que le fichier types.ts existe
+import { RootStackParamList } from "../types";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons"; 
+import { styles } from "@/style/PlayerScreen.style";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from '@react-navigation/stack'; 
 
 // Définir le type de route pour PlayerScreen
 type PlayerScreenRouteProp = RouteProp<RootStackParamList, "Player">;
 
 interface PlayerScreenProps {
-  route: PlayerScreenRouteProp; // Passer route comme prop
+  route: PlayerScreenRouteProp; 
 }
 
 export const PlayerScreen: React.FC<PlayerScreenProps> = ({ route }) => {
   const { currentTrack } = useMusicStore();
-  const { tracks } = route.params; // Récupérer 'tracks' à partir des paramètres de route
+  const { tracks } = route.params; 
+
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Home'>>();
+
+  // Fonction pour gérer le retour à la page d'accueil
+  const handleGoHome = () => {
+    navigation.navigate('Home'); 
+  };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: 20,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#232526",
-      }}
-    >
-      <View
+    <View style={styles.container}>
+      <TouchableOpacity 
+        onPress={handleGoHome} 
         style={{
-          width: 250,
-          height: 250,
-          borderRadius: 20,
-          backgroundColor: "#444",
-          justifyContent: "center",
-          alignItems: "center",
-          marginBottom: 30,
+          position: "absolute", 
+          top: 10,  
+          left: 20, 
+          zIndex: 1, 
         }}
       >
-        <Ionicons name="musical-notes-outline" size={100} color="#fff" />
+        <MaterialCommunityIcons name="keyboard-backspace" size={40} color="white"/>
+      </TouchableOpacity>
+
+      <View style={styles.albumArtContainer}>
+        <Ionicons name="musical-notes-outline" style={styles.albumIcon} />
       </View>
       {currentTrack ? (
         <>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 24,
-              fontWeight: "bold",
-              marginBottom: 8,
-            }}
-          >
+          <Text style={styles.trackTitle}>
             Now Playing: {currentTrack.filename}
           </Text>
           <PlayerControls tracks={tracks} />
-         
         </>
       ) : (
-        <View>
-          
-        </View>
+        <View></View>
       )}
     </View>
   );
