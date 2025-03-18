@@ -5,6 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { useMusicStore } from '../store';
 import { useNavigation } from '@react-navigation/native';  // Utilisation de la navigation
+import { RootStackParamList } from '../types';  // Importer RootStackParamList
+import { StackNavigationProp } from '@react-navigation/stack';
 
 interface Track {
   id: string;
@@ -12,9 +14,11 @@ interface Track {
   filename: string;
 }
 
+type PlayerScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Player'>;
+
 export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   const { currentTrack, setTrack, isPlaying, togglePlay, sound, playNext, playPrev } = useMusicStore();
-  const navigation = useNavigation();  // Hook de navigation
+  const navigation = useNavigation<PlayerScreenNavigationProp>();  // Hook de navigation
 
   const playSound = async (track: Track) => {
     if (sound) {
@@ -28,7 +32,7 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
   };
 
   const goToPlayerScreen = () => {
-    navigation.navigate('Player', { tracks });  // Navigation vers l'écran PlayerScreen
+    navigation.navigate('Player', { tracks });  // Passez les tracks en tant que paramètre
   };
 
   return (
@@ -44,25 +48,21 @@ export const MusicPlayer: React.FC<{ tracks: Track[] }> = ({ tracks }) => {
       />
       {currentTrack && (
         <TouchableOpacity onPress={goToPlayerScreen}>
-        <View style={styles.footer}>
-          <Text style={styles.nowPlaying}>Now Playing: {currentTrack.filename}</Text>
-          <View style={styles.controls}>
-            <TouchableOpacity onPress={() => playPrev(tracks)}>
-              <Ionicons name="play-back" size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={togglePlay}>
-              <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => playNext(tracks)}>
-              <Ionicons name="play-forward" size={32} color="black" />
-            </TouchableOpacity>
+          <View style={styles.footer}>
+            <Text style={styles.nowPlaying}>Now Playing: {currentTrack.filename}</Text>
+            <View style={styles.controls}>
+              <TouchableOpacity onPress={() => playPrev(tracks)}>
+                <Ionicons name="play-back" size={32} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={togglePlay}>
+                <Ionicons name={isPlaying ? "pause" : "play"} size={32} color="black" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => playNext(tracks)}>
+                <Ionicons name="play-forward" size={32} color="black" />
+              </TouchableOpacity>
+            </View>
           </View>
-          
-          
-         
-          
-        </View>
-      </TouchableOpacity>
+        </TouchableOpacity>
       )}
     </View>
   );
